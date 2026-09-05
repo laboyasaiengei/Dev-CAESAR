@@ -105,7 +105,7 @@ html[data-theme="dark"], html[data-theme="dark"] body { background: #12181A; }
 <div id="caesarBetaBadge" style="position:fixed;right:8px;bottom:8px;z-index:99997;
 background:rgba(18,42,78,.92);color:#fff;border:1px solid rgba(255,255,255,.25);
 border-radius:999px;padding:5px 8px;font:600 9.5px/1.1 sans-serif;pointer-events:none;">
-REST EXPERIMENT 0.4 · dev-caesar · ENTERPRISE APP CHECK
+REST EXPERIMENT 0.5.3 · SENTINEL v0.2 · dev-caesar
 </div>
 <div id="root"></div>
 <div id="themeCurtain" class="theme-curtain"></div>
@@ -1037,12 +1037,116 @@ function caesarDocUrl(segments){
   return `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(firebaseConfig.projectId)}/databases/(default)/documents/${caesarPathEncode(segments)}`;
 }
 
+
+/* ==================================================================
+   SENTINEL Telemetry v0.2 BETA / Dev-CAESAR
+   - Firestore REST成功時のみ端末内(localStorage)へ推計値を記録
+   - Firestoreへのテレメトリ書き込みは行わない
+   - 1分バケット集計でlocalStorage肥大化を防止
+   - Pacific Timeのquota-day集計を取得可能
+   - Google/Firebase側の実課金値ではなくアプリ起因の推計値
+   ================================================================== */
+const SENTINEL_TELEMETRY_VERSION = "0.2";
+const SENTINEL_TELEMETRY_APP = "Dev-CAESAR";
+const SENTINEL_TELEMETRY_STORAGE_KEY = "sentinelTelemetry.v0.2.Dev-CAESAR";
+
+function sentinelPtDateKey(ts){
+  try{
+    const parts=new Intl.DateTimeFormat("en-CA",{
+      timeZone:"America/Los_Angeles",year:"numeric",month:"2-digit",day:"2-digit"
+    }).formatToParts(new Date(ts));
+    const get=t=>parts.find(p=>p.type===t)?.value||"";
+    return `${get("year")}-${get("month")}-${get("day")}`;
+  }catch(_e){ return ""; }
+}
+function sentinelTelemetryLoad(){
+  try{
+    const v=JSON.parse(localStorage.getItem(SENTINEL_TELEMETRY_STORAGE_KEY)||"null");
+    if(v && v.version===SENTINEL_TELEMETRY_VERSION && v.buckets && typeof v.buckets==="object") return v;
+  }catch(_e){}
+  return {version:SENTINEL_TELEMETRY_VERSION,app:SENTINEL_TELEMETRY_APP,buckets:{}};
+}
+function sentinelTelemetrySave(s){
+  try{ localStorage.setItem(SENTINEL_TELEMETRY_STORAGE_KEY,JSON.stringify(s)); }
+  catch(e){ console.warn("[SENTINEL] telemetry save skipped",e); }
+}
+function sentinelTelemetryRecord(reads,writes,deletes,kind){
+  try{
+    const r=Math.max(0,Number(reads)||0);
+    const w=Math.max(0,Number(writes)||0);
+    const d=Math.max(0,Number(deletes)||0);
+    if(!r && !w && !d) return;
+    const s=sentinelTelemetryLoad();
+    const minute=Math.floor(Date.now()/60000)*60000;
+    const key=String(minute);
+    const b=s.buckets[key] || {t:minute,reads:0,writes:0,deletes:0,kinds:{}};
+    b.reads+=r; b.writes+=w; b.deletes+=d;
+    const k=String(kind||"unknown");
+    const kb=b.kinds[k] || {reads:0,writes:0,deletes:0,calls:0};
+    kb.reads+=r; kb.writes+=w; kb.deletes+=d; kb.calls+=1;
+    b.kinds[k]=kb;
+    s.buckets[key]=b;
+    const cutoff=Date.now()-(8*24*60*60*1000);
+    Object.keys(s.buckets).forEach(k=>{ if(Number(k)<cutoff) delete s.buckets[k]; });
+    sentinelTelemetrySave(s);
+  }catch(e){ console.warn("[SENTINEL] telemetry record skipped",e); }
+}
+function sentinelTelemetryRecordCommit(writes,kind){
+  let w=0,d=0;
+  (Array.isArray(writes)?writes:[]).forEach(x=>{
+    if(x && x.delete) d++;
+    else if(x && (x.update || x.transform)) w++;
+  });
+  sentinelTelemetryRecord(0,w,d,kind||"commit");
+}
+function sentinelTelemetrySum(filterFn){
+  return Object.values(sentinelTelemetryLoad().buckets).reduce((a,b)=>{
+    if(!filterFn || filterFn(b)){
+      a.reads+=Number(b.reads)||0; a.writes+=Number(b.writes)||0; a.deletes+=Number(b.deletes)||0;
+    }
+    return a;
+  },{reads:0,writes:0,deletes:0});
+}
+function sentinelTelemetryKinds(windowMs){
+  const now=Date.now(), out={};
+  Object.values(sentinelTelemetryLoad().buckets).forEach(b=>{
+    if(windowMs && now-Number(b.t)>windowMs) return;
+    Object.entries(b.kinds||{}).forEach(([k,v])=>{
+      const o=out[k]||(out[k]={reads:0,writes:0,deletes:0,calls:0});
+      o.reads+=Number(v.reads)||0; o.writes+=Number(v.writes)||0;
+      o.deletes+=Number(v.deletes)||0; o.calls+=Number(v.calls)||0;
+    });
+  });
+  return out;
+}
+function sentinelTelemetrySummary(){
+  const now=Date.now(), ptToday=sentinelPtDateKey(now);
+  return {
+    hour:sentinelTelemetrySum(b=>now-Number(b.t)<=60*60*1000),
+    day24:sentinelTelemetrySum(b=>now-Number(b.t)<=24*60*60*1000),
+    week:sentinelTelemetrySum(b=>now-Number(b.t)<=7*24*60*60*1000),
+    quotaDayPT:sentinelTelemetrySum(b=>sentinelPtDateKey(Number(b.t))===ptToday),
+    quotaDayPTDate:ptToday
+  };
+}
+window.SENTINEL_CAESAR_DEV={
+  version:SENTINEL_TELEMETRY_VERSION,
+  summary:sentinelTelemetrySummary,
+  kinds:(windowMs)=>sentinelTelemetryKinds(windowMs||24*60*60*1000),
+  buckets:()=>Object.values(sentinelTelemetryLoad().buckets).sort((a,b)=>a.t-b.t),
+  reset:()=>localStorage.removeItem(SENTINEL_TELEMETRY_STORAGE_KEY)
+};
+
 async function caesarGetRawDoc(segments){
   const headers = await caesarRestHeaders();
   const res = await fetch(caesarDocUrl(segments), {headers, cache:"no-store"});
-  if(res.status === 404) return null;
+  if(res.status === 404){
+    sentinelTelemetryRecord(1,0,0,"get-missing");
+    return null;
+  }
   const raw = await res.text();
   if(!res.ok) throw new Error(`REST GET HTTP ${res.status}: ${raw.slice(0,400)}`);
+  sentinelTelemetryRecord(1,0,0,"get-document");
   return raw ? JSON.parse(raw) : null;
 }
 async function caesarCommit(writes){
@@ -1052,6 +1156,7 @@ async function caesarCommit(writes){
   const res = await fetch(url, {method:"POST", headers, body:JSON.stringify({writes}), cache:"no-store"});
   const raw = await res.text();
   if(!res.ok) throw new Error(`REST COMMIT HTTP ${res.status}: ${raw.slice(0,500)}`);
+  sentinelTelemetryRecordCommit(writes,"commit");
   return raw ? JSON.parse(raw) : {};
 }
 function caesarSetWrite(segments, data, merge){
@@ -1118,6 +1223,7 @@ async function caesarRunQuery(collectionRef, queryState){
       const id = (r.document.name || "").split("/").pop();
       return caesarDocSnapshot(collectionRef.doc(id), r.document);
     });
+  sentinelTelemetryRecord(Math.max(1,docs.length),0,0,"run-query");
   return {
     docs,
     size:docs.length,
