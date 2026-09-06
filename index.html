@@ -105,7 +105,7 @@ html[data-theme="dark"], html[data-theme="dark"] body { background: #12181A; }
 <div id="caesarBetaBadge" style="position:fixed;right:8px;bottom:8px;z-index:99997;
 background:rgba(18,42,78,.92);color:#fff;border:1px solid rgba(255,255,255,.25);
 border-radius:999px;padding:5px 8px;font:600 9.5px/1.1 sans-serif;pointer-events:none;">
-REST EXPERIMENT 0.5.3 · SENTINEL v0.4 SHARED / 1min · dev-caesar
+REST EXPERIMENT 0.5.3 · SENTINEL v0.4 SHARED 1M SAFEFLUSH · dev-caesar
 </div>
 <div id="root"></div>
 <div id="themeCurtain" class="theme-curtain"></div>
@@ -1139,18 +1139,18 @@ window.SENTINEL_CAESAR_DEV={
 
 
 /* ==================================================================
-   SENTINEL Shared Sync v0.3
+   SENTINEL Shared Sync v0.4 · 1-minute buckets / 10-minute flush / SAFEFLUSH
    Shared sink: Dev-CAESAR Firestore (anonymous auth + App Check)
    - local Telemetry v0.2 remains the source of truth on this device
    - every 10 minutes, only positive unsent deltas are atomically incremented
    - one shared Firestore document per app / Pacific-Time date
    - direct fetch is used so telemetry transport does NOT count itself
    ================================================================== */
-const SENTINEL_SHARED_VERSION = "0.3";
+const SENTINEL_SHARED_VERSION = "0.4";
 const SENTINEL_SHARED_APP_ID = "caesar-dev";
 const SENTINEL_SHARED_SYNC_MS = 10*60*1000;
 const SENTINEL_SHARED_COLLECTION = "sentinelTelemetryDaily";
-const SENTINEL_SHARED_STATE_KEY = "sentinelShared.v0.3.caesar-dev";
+const SENTINEL_SHARED_STATE_KEY = "sentinelShared.v0.4.caesar-dev";
 
 const SENTINEL_SHARED_FIREBASE_CONFIG = {
   apiKey: "AIzaSyCZOI7sTRGn2xw6VWPkXblb8KW4TM_BcwU",
@@ -1259,7 +1259,27 @@ function sentinelSharedDocName(date){
 function sentinelSharedIncrementTransform(fieldPath,n){
   return {fieldPath,increment:{integerValue:String(Math.max(0,Math.trunc(Number(n)||0)))}};
 }
-async function sentinelSharedCommitDay(date,bucketDeltas){
+const SENTINEL_SHARED_MAX_TRANSFORMS = 400;
+
+function sentinelSharedChunkBuckets(bucketDeltas){
+  // Firestore has a per-document transform ceiling. Keep well below it.
+  // Reserve room for daily totals + lastSeen.
+  const chunks=[];
+  let cur={},transformCount=0;
+  for(const [bucket,d] of Object.entries(bucketDeltas).sort((a,b)=>a[0].localeCompare(b[0]))){
+    const n=(Number(d.reads)||0?1:0)+(Number(d.writes)||0?1:0)+(Number(d.deletes)||0?1:0);
+    if(n<=0)continue;
+    if(transformCount+n+4>SENTINEL_SHARED_MAX_TRANSFORMS && Object.keys(cur).length){
+      chunks.push(cur);cur={};transformCount=0;
+    }
+    cur[bucket]=d;
+    transformCount+=n;
+  }
+  if(Object.keys(cur).length)chunks.push(cur);
+  return chunks;
+}
+
+async function sentinelSharedCommitChunk(date,bucketDeltas){
   const headers=await sentinelSharedHeaders();
   const docName=sentinelSharedDocName(date);
   const transforms=[];
@@ -1267,14 +1287,15 @@ async function sentinelSharedCommitDay(date,bucketDeltas){
   Object.entries(bucketDeltas).forEach(([bucket,d])=>{
     const r=Number(d.reads)||0,w=Number(d.writes)||0,x=Number(d.deletes)||0;
     dayR+=r;dayW+=w;dayD+=x;
-    if(r)transforms.push(sentinelSharedIncrementTransform(`r_${bucket}`,r));
-    if(w)transforms.push(sentinelSharedIncrementTransform(`w_${bucket}`,w));
-    if(x)transforms.push(sentinelSharedIncrementTransform(`d_${bucket}`,x));
+    if(r)transforms.push(sentinelSharedIncrementTransform(`r1_${bucket}`,r));
+    if(w)transforms.push(sentinelSharedIncrementTransform(`w1_${bucket}`,w));
+    if(x)transforms.push(sentinelSharedIncrementTransform(`d1_${bucket}`,x));
   });
   if(dayR)transforms.push(sentinelSharedIncrementTransform("reads",dayR));
   if(dayW)transforms.push(sentinelSharedIncrementTransform("writes",dayW));
   if(dayD)transforms.push(sentinelSharedIncrementTransform("deletes",dayD));
   transforms.push({fieldPath:"lastSeen",setToServerValue:"REQUEST_TIME"});
+
   const write={
     update:{
       name:docName,
@@ -1297,27 +1318,72 @@ async function sentinelSharedCommitDay(date,bucketDeltas){
   }
   return true;
 }
+
+function sentinelSharedCheckpointChunk(state,date,chunk){
+  const sentDay=state.sent[date]||(state.sent[date]={});
+  Object.entries(chunk).forEach(([bucket,d])=>{
+    const old=sentDay[bucket]||(sentDay[bucket]={reads:0,writes:0,deletes:0});
+    old.reads=(Number(old.reads)||0)+(Number(d.reads)||0);
+    old.writes=(Number(old.writes)||0)+(Number(d.writes)||0);
+    old.deletes=(Number(old.deletes)||0)+(Number(d.deletes)||0);
+  });
+  sentinelSharedSaveState(state);
+}
+
+function sentinelSharedEnsureMinuteBaseline(){
+  // v0.4 migration guard:
+  // v0.3 may already have exported the same local history as 10-minute buckets.
+  // Baseline once so historical local telemetry is not resent/double-counted.
+  try{
+    const raw=localStorage.getItem(SENTINEL_SHARED_STATE_KEY);
+    if(raw){
+      try{
+        const parsed=JSON.parse(raw);
+        if(parsed && parsed.version===SENTINEL_SHARED_VERSION && parsed.sent) return;
+      }catch(_){}
+    }
+    const baseline=sentinelSharedAggregateLocal();
+    sentinelSharedSaveState({
+      version:SENTINEL_SHARED_VERSION,
+      sent:JSON.parse(JSON.stringify(baseline)),
+      minuteBaselineAt:Date.now()
+    });
+  }catch(e){
+    console.warn("[SENTINEL] minute baseline init skipped",e);
+  }
+}
+
 async function sentinelSharedFlush(){
   if(sentinelSharedBusy)return false;
   sentinelSharedBusy=true;
+  let writes=0;
   try{
-    const {plan,state,current}=sentinelSharedDeltaPlan();
-    let writes=0;
+    const {plan,state}=sentinelSharedDeltaPlan();
+
     for(const item of plan){
-      await sentinelSharedCommitDay(item.date,item.buckets);
-      state.sent[item.date]=JSON.parse(JSON.stringify(item.current));
-      writes++;
+      const chunks=sentinelSharedChunkBuckets(item.buckets);
+      for(const chunk of chunks){
+        await sentinelSharedCommitChunk(item.date,chunk);
+
+        // Persist immediately after each successful commit.
+        // If a later chunk/day fails, already-committed deltas will not be resent.
+        sentinelSharedCheckpointChunk(state,item.date,chunk);
+        writes++;
+      }
     }
+
     const cutoff=Date.now()-9*24*60*60*1000;
+    let pruned=false;
     Object.keys(state.sent).forEach(date=>{
       const t=Date.parse(date+"T12:00:00Z");
-      if(Number.isFinite(t)&&t<cutoff)delete state.sent[date];
+      if(Number.isFinite(t)&&t<cutoff){delete state.sent[date];pruned=true;}
     });
-    sentinelSharedSaveState(state);
+    if(pruned)sentinelSharedSaveState(state);
+
     sentinelSharedLastStatus={ok:true,at:Date.now(),error:"",writes};
     return true;
   }catch(e){
-    sentinelSharedLastStatus={ok:false,at:Date.now(),error:e&&e.message?e.message:String(e),writes:0};
+    sentinelSharedLastStatus={ok:false,at:Date.now(),error:e&&e.message?e.message:String(e),writes};
     console.warn("[SENTINEL] shared sync failed",e);
     return false;
   }finally{
@@ -1337,6 +1403,7 @@ window.SENTINEL_SHARED={
   status:()=>({...sentinelSharedLastStatus}),
   plan:()=>sentinelSharedDeltaPlan().plan
 };
+sentinelSharedEnsureMinuteBaseline();
 setTimeout(()=>sentinelSharedFlush().finally(sentinelSharedSchedule),15000);
 document.addEventListener("visibilitychange",()=>{
   if(document.visibilityState==="visible" && Date.now()-(sentinelSharedLastStatus.at||0)>SENTINEL_SHARED_SYNC_MS){
