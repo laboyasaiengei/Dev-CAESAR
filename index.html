@@ -105,7 +105,7 @@ html[data-theme="dark"], html[data-theme="dark"] body { background: #12181A; }
 <div id="caesarBetaBadge" style="position:fixed;right:8px;bottom:8px;z-index:99997;
 background:rgba(18,42,78,.92);color:#fff;border:1px solid rgba(255,255,255,.25);
 border-radius:999px;padding:5px 8px;font:600 9.5px/1.1 sans-serif;pointer-events:none;">
-REST EXPERIMENT 0.5.3 · SENTINEL v0.5 SHARED 1M DEMAND DISPATCH · dev-caesar
+REST EXPERIMENT 0.5.3 · SENTINEL v0.6 SHARED 1M ACTIVITY FLUSH · dev-caesar
 </div>
 <div id="root"></div>
 <div id="themeCurtain" class="theme-curtain"></div>
@@ -1092,7 +1092,7 @@ function sentinelTelemetryRecord(reads,writes,deletes,kind){
     // Actual Firestore activity is the most reliable sign that JS is awake.
     // If the scheduled cargo has gone stale, request one debounced catch-up dispatch.
     if(typeof sentinelSharedRequestDemandFlush==="function")
-      sentinelSharedRequestDemandFlush("firestore-activity",false);
+      sentinelSharedRequestActivityFlush();
   }catch(e){ console.warn("[SENTINEL] telemetry record skipped",e); }
 }
 function sentinelTelemetryRecordCommit(writes,kind){
@@ -1143,7 +1143,7 @@ window.SENTINEL_CAESAR_DEV={
 
 
 /* ==================================================================
-   SENTINEL Shared Sync v0.5 · 1-minute buckets / 10-minute flush / SAFEFLUSH + DEMAND DISPATCH
+   SENTINEL Shared Sync v0.6 · 1-minute buckets / SAFEFLUSH + ACTIVITY FLUSH
    Shared sink: Dev-CAESAR Firestore (anonymous auth + App Check)
    - local Telemetry v0.2 remains the source of truth on this device
    - every 10 minutes, only positive unsent deltas are atomically incremented
@@ -1170,6 +1170,10 @@ let sentinelSharedTimer=null;
 let sentinelSharedBusy=false;
 let sentinelSharedFirebaseApp=null;
 let sentinelSharedLastStatus={ok:false,at:0,error:"",writes:0};
+// v0.6 ACTIVITY FLUSH: active traffic is batched into one cargo after 30s quiet.
+const SENTINEL_SHARED_ACTIVITY_QUIET_MS = 30*1000;
+let sentinelSharedActivityTimer=null;
+let sentinelSharedLastSuccessAt=0;
 
 // v0.5 DEMAND DISPATCH: iOS/PWA may suspend timers in background.
 // Keep the 10-minute timetable, but also dispatch when real app traffic occurs
@@ -1414,25 +1418,25 @@ function sentinelSharedSchedule(){
 function sentinelSharedHasPending(){
   try{return sentinelSharedDeltaPlan().plan.length>0;}catch(_){return false;}
 }
-function sentinelSharedReferenceAt(){
-  return sentinelSharedLastSuccessAt || sentinelSharedLastStatus.at || 0;
+
+function sentinelSharedRequestActivityFlush(){
+  if(sentinelSharedActivityTimer)clearTimeout(sentinelSharedActivityTimer);
+  sentinelSharedActivityTimer=setTimeout(async()=>{
+    sentinelSharedActivityTimer=null;
+    if(!navigator.onLine || sentinelSharedBusy || !sentinelSharedHasPending()) return;
+    console.info("[SENTINEL] activity flush");
+    await sentinelSharedFlush();
+    sentinelSharedSchedule();
+  },SENTINEL_SHARED_ACTIVITY_QUIET_MS);
 }
-function sentinelSharedRequestDemandFlush(reason, force=false){
-  try{
-    if(!navigator.onLine || sentinelSharedBusy) return;
-    if(!sentinelSharedHasPending()) return;
-    const stale=Date.now()-sentinelSharedReferenceAt()>=SENTINEL_SHARED_SYNC_MS;
-    if(!force && !stale) return;
-    if(sentinelSharedDemandTimer) return;
-    sentinelSharedDemandTimer=setTimeout(async()=>{
-      sentinelSharedDemandTimer=null;
-      if(!navigator.onLine || sentinelSharedBusy || !sentinelSharedHasPending()) return;
-      console.info("[SENTINEL] demand dispatch",reason||"activity");
-      await sentinelSharedFlush();
-      sentinelSharedSchedule();
-    },SENTINEL_SHARED_DEMAND_DEBOUNCE_MS);
-  }catch(e){console.warn("[SENTINEL] demand dispatch skipped",e);}
+
+function sentinelSharedResumeCheck(reason){
+  if(document.visibilityState!=="visible") return;
+  if(!navigator.onLine || sentinelSharedBusy || !sentinelSharedHasPending()) return;
+  console.info("[SENTINEL] resume dispatch",reason||"resume");
+  sentinelSharedFlush().finally(sentinelSharedSchedule);
 }
+
 window.SENTINEL_SHARED={
   appId:SENTINEL_SHARED_APP_ID,
   flush:sentinelSharedFlush,
@@ -1442,13 +1446,25 @@ window.SENTINEL_SHARED={
 sentinelSharedEnsureMinuteBaseline();
 setTimeout(()=>sentinelSharedFlush().finally(sentinelSharedSchedule),15000);
 
-function sentinelSharedResumeCheck(reason){
-  if(document.visibilityState!=="visible") return;
-  sentinelSharedRequestDemandFlush(reason,true);
-}
 document.addEventListener("visibilitychange",()=>{
-  if(document.visibilityState==="visible") sentinelSharedResumeCheck("visibility");
+  if(document.visibilityState==="visible"){
+    sentinelSharedResumeCheck("visibility");
+  }else{
+    if(sentinelSharedActivityTimer){
+      clearTimeout(sentinelSharedActivityTimer);
+      sentinelSharedActivityTimer=null;
+    }
+    if(navigator.onLine && !sentinelSharedBusy && sentinelSharedHasPending())
+      sentinelSharedFlush().catch(()=>{});
+  }
 });
+window.addEventListener("pagehide",()=>{
+  if(navigator.onLine && !sentinelSharedBusy && sentinelSharedHasPending())
+    sentinelSharedFlush().catch(()=>{});
+});
+window.addEventListener("pageshow",()=>sentinelSharedResumeCheck("pageshow"));
+window.addEventListener("focus",()=>sentinelSharedResumeCheck("focus"));
+window.addEventListener("online",()=>sentinelSharedResumeCheck("online"));
 window.addEventListener("pageshow",()=>sentinelSharedResumeCheck("pageshow"));
 window.addEventListener("focus",()=>sentinelSharedResumeCheck("focus"));
 window.addEventListener("online",()=>sentinelSharedResumeCheck("online"));
