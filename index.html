@@ -124,29 +124,63 @@ REST EXPERIMENT 0.5.3 · SENTINEL v0.6 SHARED 1M ACTIVITY FLUSH · dev-caesar
 <script>
 
 /* ==================================================================
-   Persistent Diagnostic Log v0.1 (local only / no chemical or user data)
+   Central Diagnostic Reporter v0.2
+   Local fallback + SENTINEL shared error reporting.
+   No user-entered task/name/content is transmitted.
    ================================================================== */
-const CAESAR_DIAG_LOG_VERSION="0.1";
-const CAESAR_DIAG_LOG_KEY="caesarDiagnosticLog.v0.1";
+const CAESAR_DIAG_LOG_VERSION="0.2";
+const CAESAR_DIAG_LOG_KEY="caesarDiagnosticLog.v0.2";
 const CAESAR_DIAG_LOG_LIMIT=200;
+const SENTINEL_DIAG_COLLECTION="sentinelDiagnostics";
+const SENTINEL_DIAG_APP_ID="caesar-dev";
+const SENTINEL_DIAG_DEDUPE_MS=60*1000;
+const SENTINEL_DIAG_MAX_PER_10MIN=10;
+let caesarDiagRecent=[];
 function caesarDiagLogLoad(){try{const x=JSON.parse(localStorage.getItem(CAESAR_DIAG_LOG_KEY)||"[]");return Array.isArray(x)?x:[]}catch(_){return []}}
-function caesarDiagLogRecord(category,locationName,status,detail){
-  try{const rows=caesarDiagLogLoad();rows.push({time:new Date().toISOString(),appVersion:"REST EXPERIMENT 0.5.3",online:navigator.onLine!==false,status:status==null?null:Number(status),category:String(category||"unknown").slice(0,40),location:String(locationName||"unknown").slice(0,80),detail:String(detail||"").slice(0,160)});localStorage.setItem(CAESAR_DIAG_LOG_KEY,JSON.stringify(rows.slice(-CAESAR_DIAG_LOG_LIMIT)))}catch(_){}
+function caesarDiagSafeDetail(category,detail){
+  if(category==="http-error")return String(detail||"").toUpperCase().slice(0,12);
+  if(category==="network-error")return "fetch-failed";
+  if(category==="javascript-error")return "runtime-exception";
+  if(category==="promise-rejection")return "promise-rejection";
+  if(category==="connection")return detail==="offline"?"offline":"online";
+  if(category==="self-test")return "diagnostic-test";
+  return "";
 }
+function caesarDiagShouldRemote(category){return ["http-error","network-error","javascript-error","promise-rejection","connection","self-test"].includes(category)}
+function caesarDiagLogRecord(category,location,status,detail){
+  const row={time:new Date().toISOString(),appVersion:(typeof CAESAR_REST_MAINLINE_VERSION!=="undefined"?CAESAR_REST_MAINLINE_VERSION:"dev-beta"),online:navigator.onLine!==false,status:status==null?null:Number(status),category:String(category||"unknown").slice(0,40),location:String(location||"unknown").slice(0,80),detail:caesarDiagSafeDetail(category,detail)};
+  try{const rows=caesarDiagLogLoad();rows.push(row);localStorage.setItem(CAESAR_DIAG_LOG_KEY,JSON.stringify(rows.slice(-CAESAR_DIAG_LOG_LIMIT)))}catch(_){}
+  if(caesarDiagShouldRemote(row.category))setTimeout(()=>caesarDiagReportRemote(row).catch(()=>{}),0);
+}
+function caesarDiagLogText(){const rows=caesarDiagLogLoad().slice(-40).reverse();if(!rows.length)return "記録なし";return rows.map(r=>`${r.time} | ${r.appVersion} | ${r.online?"online":"offline"} | ${r.status==null?"—":r.status} | ${r.category} | ${r.location}${r.detail?" | "+r.detail:""}`).join("\\n")}
 function caesarDiagUrlLocation(url){try{const u=new URL(String(url),location.href);if(u.hostname.includes("firestore.googleapis.com"))return "Firestore REST";if(u.hostname.includes("identitytoolkit.googleapis.com"))return "Firebase Auth";if(u.hostname.includes("securetoken.googleapis.com"))return "Firebase Token";return "network"}catch(_){return "network"}}
-function caesarDiagLogText(){const rows=caesarDiagLogLoad().slice(-80).reverse();return rows.length?rows.map(r=>`${r.time} | ${r.appVersion} | ${r.online?"online":"offline"} | ${r.status==null?"—":r.status} | ${r.category} | ${r.location}${r.detail?" | "+r.detail:""}`).join("\\n"):"記録なし"}
-(function(){const originalFetch=window.fetch;window.fetch=async function(input,init){const url=typeof input==="string"?input:(input&&input.url)||"";try{const res=await originalFetch.apply(this,arguments);if(!res.ok&&/googleapis\\.com|firebase/i.test(url))caesarDiagLogRecord("http-error",caesarDiagUrlLocation(url),res.status,(init&&init.method)||"GET");return res}catch(e){if(/googleapis\\.com|firebase/i.test(url))caesarDiagLogRecord("network-error",caesarDiagUrlLocation(url),null,e&&e.name||"fetch failed");throw e}}})();
-window.addEventListener("error",e=>caesarDiagLogRecord("javascript-error","window",null,e&&e.message||"error"));
-window.addEventListener("unhandledrejection",e=>caesarDiagLogRecord("promise-rejection","window",null,e&&e.reason&&e.reason.message||String(e&&e.reason||"rejection")));
+async function caesarDiagReportRemote(row){
+  const now=Date.now(),sig=`${row.category}|${row.location}|${row.status??""}`;
+  caesarDiagRecent=caesarDiagRecent.filter(x=>now-x.t<10*60*1000);
+  if(caesarDiagRecent.some(x=>x.sig===sig&&now-x.t<SENTINEL_DIAG_DEDUPE_MS))return;
+  if(caesarDiagRecent.length>=SENTINEL_DIAG_MAX_PER_10MIN)return;
+  caesarDiagRecent.push({t:now,sig});
+  const headers=await sentinelSharedHeaders();
+  const id=`${SENTINEL_DIAG_APP_ID}_${now}_${Math.random().toString(36).slice(2,8)}`;
+  const base=`https://firestore.googleapis.com/v1/projects/${SENTINEL_SHARED_FIREBASE_CONFIG.projectId}/databases/(default)/documents/${SENTINEL_DIAG_COLLECTION}`;
+  const fields={appId:{stringValue:SENTINEL_DIAG_APP_ID},occurredAt:{timestampValue:row.time},appVersion:{stringValue:String(row.appVersion)},online:{booleanValue:!!row.online},category:{stringValue:row.category},location:{stringValue:row.location},detail:{stringValue:row.detail||""}};
+  if(row.status!=null)fields.httpStatus={integerValue:String(Math.trunc(row.status))};
+  window.__caesarDiagSending=true;
+  try{const res=await fetch(`${base}?documentId=${encodeURIComponent(id)}`,{method:"POST",headers,body:JSON.stringify({fields}),cache:"no-store"});if(!res.ok)throw new Error(`diag HTTP ${res.status}`)}finally{window.__caesarDiagSending=false}
+}
+(function(){const originalFetch=window.fetch;window.fetch=async function(input,init){const url=typeof input==="string"?input:(input&&input.url)||"";try{const res=await originalFetch.apply(this,arguments);if(!window.__caesarDiagSending&&!res.ok&&/googleapis\\.com|firebase/i.test(url))caesarDiagLogRecord("http-error",caesarDiagUrlLocation(url),res.status,(init&&init.method)||"GET");return res}catch(e){if(!window.__caesarDiagSending&&/googleapis\\.com|firebase/i.test(url))caesarDiagLogRecord("network-error",caesarDiagUrlLocation(url),null,"fetch-failed");throw e}}})();
+window.addEventListener("error",e=>caesarDiagLogRecord("javascript-error","window",null,"runtime-exception"));
+window.addEventListener("unhandledrejection",()=>caesarDiagLogRecord("promise-rejection","window",null,"promise-rejection"));
 window.addEventListener("online",()=>caesarDiagLogRecord("connection","browser",null,"online"));
 window.addEventListener("offline",()=>caesarDiagLogRecord("connection","browser",null,"offline"));
-caesarDiagLogRecord("startup","application",null,"diagnostic logger ready");
+window.CAESAR_DIAGNOSTIC_LOG={list:caesarDiagLogLoad,text:caesarDiagLogText,clear:()=>localStorage.removeItem(CAESAR_DIAG_LOG_KEY),test:()=>caesarDiagLogRecord("self-test","local",200,"diagnostic-test")};
+
 function caesarOpenDiagnosticLog(){
   let ov=document.getElementById("caesarDiagOverlay");
-  if(!ov){ov=document.createElement("div");ov.id="caesarDiagOverlay";ov.style.cssText="position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center";ov.innerHTML='<div style="background:#fff;color:#182524;width:100%;max-width:760px;max-height:78vh;border-radius:18px 18px 0 0;padding:16px;display:flex;flex-direction:column;gap:10px"><b>CAESAR 診断ログ</b><div style="font-size:11px;color:#4E625E">端末内のみ保存・最大200件。薬品名や入力内容は記録しません。</div><pre id="caesarDiagPre" style="white-space:pre-wrap;overflow:auto;background:#EEF1EC;padding:10px;border-radius:10px;font-size:10px;line-height:1.55;flex:1"></pre><div style="display:flex;gap:8px"><button id="caesarDiagTest" style="flex:1;padding:10px">機能テスト</button><button id="caesarDiagClear" style="flex:1;padding:10px">消去</button><button id="caesarDiagClose" style="flex:1;padding:10px">閉じる</button></div></div>';document.body.appendChild(ov);ov.querySelector("#caesarDiagClose").onclick=()=>ov.remove();ov.querySelector("#caesarDiagClear").onclick=()=>{localStorage.removeItem(CAESAR_DIAG_LOG_KEY);ov.querySelector("#caesarDiagPre").textContent=caesarDiagLogText()};ov.querySelector("#caesarDiagTest").onclick=()=>{caesarDiagLogRecord("self-test","local",200,"no network");ov.querySelector("#caesarDiagPre").textContent=caesarDiagLogText()};}
+  if(!ov){ov=document.createElement("div");ov.id="caesarDiagOverlay";ov.style.cssText="position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center";ov.innerHTML='<div style="background:#fff;color:#182524;width:100%;max-width:760px;max-height:78vh;border-radius:18px 18px 0 0;padding:16px;display:flex;flex-direction:column;gap:10px"><b>CAESAR 診断ログ</b><div style="font-size:11px;color:#4E625E">端末内にも保持し、エラーはSENTINELへ技術情報のみ通報します。薬品名や入力内容は送信しません。</div><pre id="caesarDiagPre" style="white-space:pre-wrap;overflow:auto;background:#EEF1EC;padding:10px;border-radius:10px;font-size:10px;line-height:1.55;flex:1"></pre><div style="display:flex;gap:8px"><button id="caesarDiagTest" style="flex:1;padding:10px">通報テスト</button><button id="caesarDiagClear" style="flex:1;padding:10px">端末ログ消去</button><button id="caesarDiagClose" style="flex:1;padding:10px">閉じる</button></div></div>';document.body.appendChild(ov);ov.querySelector("#caesarDiagClose").onclick=()=>ov.remove();ov.querySelector("#caesarDiagClear").onclick=()=>{localStorage.removeItem(CAESAR_DIAG_LOG_KEY);ov.querySelector("#caesarDiagPre").textContent=caesarDiagLogText()};ov.querySelector("#caesarDiagTest").onclick=()=>{caesarDiagLogRecord("self-test","local",200,"diagnostic-test");setTimeout(()=>ov.querySelector("#caesarDiagPre").textContent=caesarDiagLogText(),100)};}
   ov.querySelector("#caesarDiagPre").textContent=caesarDiagLogText();
 }
-window.CAESAR_DIAGNOSTIC_LOG={list:caesarDiagLogLoad,text:caesarDiagLogText,open:caesarOpenDiagnosticLog,clear:()=>localStorage.removeItem(CAESAR_DIAG_LOG_KEY),test:()=>caesarDiagLogRecord("self-test","local",200,"no network")};
+window.CAESAR_DIAGNOSTIC_LOG.open=caesarOpenDiagnosticLog;
 
 </script>
 
