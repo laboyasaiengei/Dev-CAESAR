@@ -123,6 +123,9 @@ REST EXPERIMENT 0.5.3 · SENTINEL v0.6 SHARED 1M ACTIVITY FLUSH · dev-caesar
 
 <script>
 
+const CAESAR_APP_VERSION = "0.5.3";
+const CAESAR_REST_MAINLINE_VERSION = CAESAR_APP_VERSION;
+
 /* ==================================================================
    Central Diagnostic Reporter v0.2
    Local fallback + SENTINEL shared error reporting.
@@ -148,7 +151,7 @@ function caesarDiagSafeDetail(category,detail){
 }
 function caesarDiagShouldRemote(category){return ["http-error","network-error","javascript-error","promise-rejection","connection","self-test"].includes(category)}
 function caesarDiagLogRecord(category,location,status,detail){
-  const row={time:new Date().toISOString(),appVersion:(typeof CAESAR_REST_MAINLINE_VERSION!=="undefined"?CAESAR_REST_MAINLINE_VERSION:"dev-beta"),online:navigator.onLine!==false,status:status==null?null:Number(status),category:String(category||"unknown").slice(0,40),location:String(location||"unknown").slice(0,80),detail:caesarDiagSafeDetail(category,detail)};
+  const row={time:new Date().toISOString(),appVersion:(typeof CAESAR_APP_VERSION!=="undefined"?CAESAR_APP_VERSION:"dev-beta"),online:navigator.onLine!==false,status:status==null?null:Number(status),category:String(category||"unknown").slice(0,40),location:String(location||"unknown").slice(0,80),detail:caesarDiagSafeDetail(category,detail)};
   try{const rows=caesarDiagLogLoad();rows.push(row);localStorage.setItem(CAESAR_DIAG_LOG_KEY,JSON.stringify(rows.slice(-CAESAR_DIAG_LOG_LIMIT)))}catch(_){}
   if(caesarDiagShouldRemote(row.category))setTimeout(()=>caesarDiagReportRemote(row).catch(()=>{}),0);
 }
