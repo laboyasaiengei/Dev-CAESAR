@@ -121,6 +121,35 @@ REST EXPERIMENT 0.5.3 · SENTINEL v0.6 SHARED 1M ACTIVITY FLUSH · dev-caesar
   });
 </script>
 
+<script>
+
+/* ==================================================================
+   Persistent Diagnostic Log v0.1 (local only / no chemical or user data)
+   ================================================================== */
+const CAESAR_DIAG_LOG_VERSION="0.1";
+const CAESAR_DIAG_LOG_KEY="caesarDiagnosticLog.v0.1";
+const CAESAR_DIAG_LOG_LIMIT=200;
+function caesarDiagLogLoad(){try{const x=JSON.parse(localStorage.getItem(CAESAR_DIAG_LOG_KEY)||"[]");return Array.isArray(x)?x:[]}catch(_){return []}}
+function caesarDiagLogRecord(category,locationName,status,detail){
+  try{const rows=caesarDiagLogLoad();rows.push({time:new Date().toISOString(),appVersion:"REST EXPERIMENT 0.5.3",online:navigator.onLine!==false,status:status==null?null:Number(status),category:String(category||"unknown").slice(0,40),location:String(locationName||"unknown").slice(0,80),detail:String(detail||"").slice(0,160)});localStorage.setItem(CAESAR_DIAG_LOG_KEY,JSON.stringify(rows.slice(-CAESAR_DIAG_LOG_LIMIT)))}catch(_){}
+}
+function caesarDiagUrlLocation(url){try{const u=new URL(String(url),location.href);if(u.hostname.includes("firestore.googleapis.com"))return "Firestore REST";if(u.hostname.includes("identitytoolkit.googleapis.com"))return "Firebase Auth";if(u.hostname.includes("securetoken.googleapis.com"))return "Firebase Token";return "network"}catch(_){return "network"}}
+function caesarDiagLogText(){const rows=caesarDiagLogLoad().slice(-80).reverse();return rows.length?rows.map(r=>`${r.time} | ${r.appVersion} | ${r.online?"online":"offline"} | ${r.status==null?"—":r.status} | ${r.category} | ${r.location}${r.detail?" | "+r.detail:""}`).join("\\n"):"記録なし"}
+(function(){const originalFetch=window.fetch;window.fetch=async function(input,init){const url=typeof input==="string"?input:(input&&input.url)||"";try{const res=await originalFetch.apply(this,arguments);if(!res.ok&&/googleapis\\.com|firebase/i.test(url))caesarDiagLogRecord("http-error",caesarDiagUrlLocation(url),res.status,(init&&init.method)||"GET");return res}catch(e){if(/googleapis\\.com|firebase/i.test(url))caesarDiagLogRecord("network-error",caesarDiagUrlLocation(url),null,e&&e.name||"fetch failed");throw e}}})();
+window.addEventListener("error",e=>caesarDiagLogRecord("javascript-error","window",null,e&&e.message||"error"));
+window.addEventListener("unhandledrejection",e=>caesarDiagLogRecord("promise-rejection","window",null,e&&e.reason&&e.reason.message||String(e&&e.reason||"rejection")));
+window.addEventListener("online",()=>caesarDiagLogRecord("connection","browser",null,"online"));
+window.addEventListener("offline",()=>caesarDiagLogRecord("connection","browser",null,"offline"));
+caesarDiagLogRecord("startup","application",null,"diagnostic logger ready");
+function caesarOpenDiagnosticLog(){
+  let ov=document.getElementById("caesarDiagOverlay");
+  if(!ov){ov=document.createElement("div");ov.id="caesarDiagOverlay";ov.style.cssText="position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center";ov.innerHTML='<div style="background:#fff;color:#182524;width:100%;max-width:760px;max-height:78vh;border-radius:18px 18px 0 0;padding:16px;display:flex;flex-direction:column;gap:10px"><b>CAESAR 診断ログ</b><div style="font-size:11px;color:#4E625E">端末内のみ保存・最大200件。薬品名や入力内容は記録しません。</div><pre id="caesarDiagPre" style="white-space:pre-wrap;overflow:auto;background:#EEF1EC;padding:10px;border-radius:10px;font-size:10px;line-height:1.55;flex:1"></pre><div style="display:flex;gap:8px"><button id="caesarDiagTest" style="flex:1;padding:10px">機能テスト</button><button id="caesarDiagClear" style="flex:1;padding:10px">消去</button><button id="caesarDiagClose" style="flex:1;padding:10px">閉じる</button></div></div>';document.body.appendChild(ov);ov.querySelector("#caesarDiagClose").onclick=()=>ov.remove();ov.querySelector("#caesarDiagClear").onclick=()=>{localStorage.removeItem(CAESAR_DIAG_LOG_KEY);ov.querySelector("#caesarDiagPre").textContent=caesarDiagLogText()};ov.querySelector("#caesarDiagTest").onclick=()=>{caesarDiagLogRecord("self-test","local",200,"no network");ov.querySelector("#caesarDiagPre").textContent=caesarDiagLogText()};}
+  ov.querySelector("#caesarDiagPre").textContent=caesarDiagLogText();
+}
+window.CAESAR_DIAGNOSTIC_LOG={list:caesarDiagLogLoad,text:caesarDiagLogText,open:caesarOpenDiagnosticLog,clear:()=>localStorage.removeItem(CAESAR_DIAG_LOG_KEY),test:()=>caesarDiagLogRecord("self-test","local",200,"no network")};
+
+</script>
+
 <script type="text/babel" data-presets="react">
 const { useState, useMemo, useEffect } = React;
 console.info("CAESAR REST EXPERIMENT 0.5.3 / isolated beta_ namespace / v3 App Check");
@@ -5602,6 +5631,14 @@ const handleDeleteWasteCategories = (wastes) => {
         style={{ border: "none", background: "rgba(255,255,255,.14)", color: HEADER.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: 999, padding: 0, flex: "0 0 auto" }}
       >
         <RotateCcw size={16} />
+      </button>
+      <button
+        onClick={caesarOpenDiagnosticLog}
+        aria-label="診断ログを開く"
+        title="診断ログ"
+        style={{ border: "none", background: "rgba(255,255,255,.14)", color: HEADER.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", height: 32, borderRadius: 999, padding: "0 9px", flex: "0 0 auto", fontSize: 10, fontWeight: 700 }}
+      >
+        診断
       </button>
       <button
         onClick={toggleTheme}
