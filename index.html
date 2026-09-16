@@ -105,7 +105,7 @@ html[data-theme="dark"], html[data-theme="dark"] body { background: #12181A; }
 <div id="caesarBetaBadge" style="position:fixed;right:8px;bottom:8px;z-index:99997;
 background:rgba(18,42,78,.92);color:#fff;border:1px solid rgba(255,255,255,.25);
 border-radius:999px;padding:5px 8px;font:600 9.5px/1.1 sans-serif;pointer-events:none;">
-REST EXPERIMENT 0.6.X · SENTINEL v0.6 SHARED 1M ACTIVITY FLUSH · dev-caesar
+REST EXPERIMENT 0.5.3 · SENTINEL v0.6 SHARED 1M ACTIVITY FLUSH · dev-caesar
 </div>
 <div id="root"></div>
 <div id="themeCurtain" class="theme-curtain"></div>
@@ -123,7 +123,7 @@ REST EXPERIMENT 0.6.X · SENTINEL v0.6 SHARED 1M ACTIVITY FLUSH · dev-caesar
 
 <script>
 
-const CAESAR_APP_VERSION = "0.6.X";
+const CAESAR_APP_VERSION = "0.6.Y";
 const CAESAR_REST_MAINLINE_VERSION = CAESAR_APP_VERSION;
 
 /* ==================================================================
@@ -189,7 +189,7 @@ window.CAESAR_DIAGNOSTIC_LOG.open=caesarOpenDiagnosticLog;
 
 <script type="text/babel" data-presets="react">
 const { useState, useMemo, useEffect } = React;
-console.info("CAESAR REST EXPERIMENT 0.6.X / isolated beta_ namespace / v3 App Check");
+console.info("CAESAR REST EXPERIMENT 0.5.3 / isolated beta_ namespace / v3 App Check");
 
 /* 簡易アイコンセット（lucide-react相当のグリフをSVGで再現） */
 function IconBase({ size = 18, color = "currentColor", children, style }) {
@@ -915,7 +915,7 @@ function isAppCheckDisabledByUrl(){
 
 
 /* ======================================================================
-   CAESAR REST EXPERIMENT 0.6.X
+   CAESAR REST EXPERIMENT 0.5.3
    - Firestore data read/write: REST only
    - Firebase Auth SDK is not used for data authentication
    - App Check: existing reCAPTCHA v3 provider
@@ -3813,9 +3813,20 @@ function ChemicalDetail({ chemical, waste, onBack, onEdit, onOpenLocation, onOpe
       />
       <HazardStripe />
       <div style={{ padding: 16 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18, flexWrap: "wrap" }}>
           <FormulaTag formula={chemical.formula} size={16} />
           <AutoStatusBadge statusKey={status} />
+          {chemical.riskAssessment && (
+            <span
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 4,
+                fontSize: 12, fontWeight: 700, color: C.danger, background: C.dangerBg,
+                borderRadius: 20, padding: "5px 11px", whiteSpace: "nowrap",
+              }}
+            >
+              <AlertTriangle size={12} /> アセス対象
+            </span>
+          )}
         </div>
 
         <SectionLabel>在庫状況（g）</SectionLabel>
