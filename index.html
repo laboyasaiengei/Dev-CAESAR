@@ -5657,6 +5657,32 @@ function RestoreBackupPreviewPage({ backupId, onBack, onRestore }) {
   );
 }
 
+function AdminMenuPage({ onBack, onExport, onOpenRestore, onOpenDelete }) {
+  const items = [
+    { icon: Download, label: "薬品一覧をExcelで書き出す", onClick: onExport },
+    { icon: RotateCcw, label: "バックアップから復元する", onClick: onOpenRestore },
+    { icon: Trash2, label: "使用記録を消去する", onClick: onOpenDelete },
+  ];
+  return (
+    <div>
+      <TopBar title="管理者メニュー" onBack={onBack} />
+      <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+        {items.map(({ icon: Icon, label, onClick }) => (
+          <button
+            key={label}
+            onClick={onClick}
+            style={{ width: "100%", textAlign: "left", background: C.paper, border: `1px solid ${C.line}`, borderRadius: 14, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}
+          >
+            <Icon size={18} color={C.tealDeep} />
+            <div style={{ flex: 1, fontWeight: 600, fontSize: 14.5, color: C.ink }}>{label}</div>
+            <Chevron />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /*  使用記録の消去（管理者専用）                                          */
 /* ------------------------------------------------------------------ */
@@ -6277,45 +6303,19 @@ const toggleTheme = () => {
 
   // Excelエクスポート（管理者専用）：薬品一覧・使用記録などを書き出す。誤操作防止のため、
   // 実行前に管理者パスコードの入力を要求する。
-  const handleExportExcelRequest = () => {
-    setPasscodeGate({
-      title: "管理者確認",
-      message: "Excelを書き出すには、管理者パスコードを入力してください。",
-      onCancel: () => setPasscodeGate(null),
-      onConfirm: () => {
-        setPasscodeGate(null);
-        handleExportExcel();
-      },
-    });
-  };
-
-  // 使用記録の消去（管理者専用）：任意の期間の使用記録をまとめて削除する。誤操作防止のため、
-  // 実行前に管理者パスコードの入力を要求する（実際の削除実行はページ内でさらにwindow.confirmを挟む）。
-  const handleDeleteUsageEntriesRequest = () => {
-    setPasscodeGate({
-      title: "管理者確認",
-      message: "使用記録を消去するには、管理者パスコードを入力してください。",
-      onCancel: () => setPasscodeGate(null),
-      onConfirm: () => {
-        setPasscodeGate(null);
-        push({ view: "deleteUsageEntries" });
-      },
-    });
-  };
-
-  // 復元（管理者専用）：過去のバックアップから内容を選んで復元する。誤操作防止のため、
-  // 実行前に管理者パスコードの入力を要求する。
-  const handleRestoreRequest = () => {
-    setPasscodeGate({
-      title: "管理者確認",
-      message: "過去のバックアップから復元するには、管理者パスコードを入力してください。",
-      onCancel: () => setPasscodeGate(null),
-      onConfirm: () => {
-        setPasscodeGate(null);
-        push({ view: "restoreList" });
-      },
-    });
-  };
+  // 管理者メニュー：Excel出力／復元／使用記録消去をまとめて1つの鍵ボタンの奥に置く。
+// パスコードはメニューを開く時に1回だけ要求する。
+const handleAdminMenuRequest = () => {
+  setPasscodeGate({
+    title: "管理者確認",
+    message: "管理者メニューを開くには、パスコードを入力してください。",
+    onCancel: () => setPasscodeGate(null),
+    onConfirm: () => {
+      setPasscodeGate(null);
+      push({ view: "adminMenu" });
+    },
+  });
+};
 
   const handleRunRestore = async (backupId) => {
     try {
@@ -6638,29 +6638,14 @@ const handleDeleteWasteCategories = (wastes) => {
   right={
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <button
-        onClick={handleExportExcelRequest}
-        aria-label="薬品一覧をExcelで書き出す（管理者のみ）"
-        title="薬品一覧をExcelで書き出す（管理者のみ）"
+        onClick={handleAdminMenuRequest}
+        aria-label="管理者メニュー"
+        title="管理者メニュー"
         style={{ border: "none", background: "rgba(255,255,255,.14)", color: HEADER.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: 999, padding: 0, flex: "0 0 auto" }}
       >
-        <Lock size={16} />
+      <Lock size={16} />
       </button>
-      <button
-        onClick={handleRestoreRequest}
-        aria-label="バックアップから復元する（管理者のみ）"
-        title="バックアップから復元する（管理者のみ）"
-        style={{ border: "none", background: "rgba(255,255,255,.14)", color: HEADER.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: 999, padding: 0, flex: "0 0 auto" }}
-      >
-        <Lock size={16} />
-      </button>
-      <button
-        onClick={handleDeleteUsageEntriesRequest}
-        aria-label="使用記録を消去する（管理者のみ）"
-        title="使用記録を消去する（管理者のみ）"
-        style={{ border: "none", background: "rgba(255,255,255,.14)", color: HEADER.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: 999, padding: 0, flex: "0 0 auto" }}
-      >
-        <Lock size={16} />
-      </button>
+
       <button
         onClick={caesarOpenDiagnosticLog}
         aria-label="診断ログを開く"
@@ -6875,6 +6860,15 @@ const handleDeleteWasteCategories = (wastes) => {
         {current.view === "changePasscode" && (
           <ChangePasscodePage onBack={pop} onSave={handleSavePasscode} />
         )}
+        
+        {current.view === "adminMenu" && (
+          <AdminMenuPage
+           onBack={pop}
+           onExport={() => { handleExportExcel(); pop(); }}
+           onOpenRestore={() => push({ view: "restoreList" })}
+           onOpenDelete={() => push({ view: "deleteUsageEntries" })}
+          />
+         )}
 
         {current.view === "restoreList" && (
           <RestoreListPage
