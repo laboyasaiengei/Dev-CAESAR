@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="color-scheme" content="light">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
-<title>Dev-CAESAR +assess prototype</title>
+<title>CAESAR REST EXPERIMENT 0.5.3</title>
 
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAAwUlEQVR4nOWV3Q2AIAyExTiBbqG7yKwMwxjs4IMJMdifo0qMek/GYL82Xg83zmvXUn3T6j8EpBhSDA0BBg3gub3xafHFsyqn2pQrB2IkwLkE8gYCyF3vAjEEAJw9xYAw0J981rT4PJDQDW3T7BbZ9ce6HMM+gVw3S1k00Ox2wHV9HlCbndUAVaqVaUBeS9lFx9Icxr4HRVRwYtOUzBZD2LETCHfLDXFdSJjm0oXDYW6+MkkG/knzTa6bwKCns+gFgA1vc26l6gQV/QAAAABJRU5ErkJggg==" />
 <link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAEbUlEQVR4nO3d3U3jQBSG4WG1FUAXSy9QK8VQBj3sxZEiK8mXhHg85+99rvYKD2deDZYh3pfXfx8DuOaP9wIQF3FAIg5IxAGJOCARByTigEQckIgDEnFAIg5IxAGJOCARByTigEQckIgDEnFAIg5IxAGJOCARByTigEQckIgDEnFA+uu9gEB+vr/sH2/vn74rCeKFz8qOTRZbJNI9jqtZnDTvo3Uct8s4aZtI0zgezGKrYSLt4ngii61WiTSK4/HbC25ETJc4nthvEqkfx8497pxI5Tgm7mvPRGrGccReNuyjYByH7mKrRErFsWznmiRSJA6X3SqfSPo4fHeodh+54wiyN0GWMV3WOALuR8Al7ZQvjuB7cGN57mv7rUxxBM/iJMs678oRR8ZxZ1zzmQRxrJzy9D8jTZ1I6DgWT/bscvQRNI4gD7WaP1QNF4fjENWl2yYSK46wjzsPurNZcK09osQRZF786m7LP46AYyIR4xlH8NGQiFscYSey5fKIZcG1HuQQR8Ap3Nb2CFkaR7Rv/lcaJhIijuBZbLknUjOOCN/tFHc/UHl0Issm5vlmn7f3z3RljAeWvfPjuGfXmvWlnuAWR8Ystm4n8vP9NSsRx0HxTrBdliXigjgmqJoIcUyz7EZkGeKYqdgRQhzzlUmEOI5yN5GVi3kOcRwrdR/R32Bc4K3CtvL4KVwKfXJsB5pxuFuXP2Xi5x46jnpOQcQvY8T/sVJPiiwMJwck4oBEHJCIAxJxQCIOSMQBiTggEQck4oBEHJCIAxJxQCIOSMQBiTggEQck4oBEHJCIAxJxQCIOSMQBiTggEQck4oBEHJCIAxJxQCIOSMQBiTggEQck4oBEHJCIYzXeYIzrTlmk6CN0HNsX7yV6Cd9VlwdG/D6iv2oyexMjQwRK6JOjgBtlxO8++smRV5z/HvZpxDFfgSwMccxUJgvDPcc0xcoYnBxT1MvCEMcuVbMwbnH8fH+lnt2yLBwfk3ieHPZtp0vk7m7VKGOM8fL672PZxdS3mqgP9wNj5axC3HOkOELcs1hv6clh0t3EBcli/WQc4jDRBnHVykUGHIhbHCPkOLbaHhgnnnGYgKMhC+MfhwkyJrLYihKH8R3Zsr+9SFHGiBbHcB3cgkcLWbIw4eIwLkO8vGjbLEzQOMzigZ5dbtbXz5iFCR2HcXnYQBkjRRwj54gzrvlMjjhMlnFnWeddmeIwwUef+rMIZ/LFYQImEnBJO2WNwwTZjyDLmC53HMN7Y6pmYdLHYYI8NFtw0ZWKxGH4tdlcpeIwh+5ckyxMwTjGMVvYKgtTMw4zcTsbljFqx2F27mvPLEz9OMwTe9w5C9MljvGbzSYL0ygOs/MjQ33KGA3jME8k0ioL0zQO82AiDbMwreMY3F7c1D0OczWR5mUM4tia/gek2REHJN4mCIk4IBEHJOKARByQiAMScUAiDkjEAYk4IBEHJOKARByQiAMScUAiDkjEAYk4IBEHJOKARByQiAMScUAiDkjEAYk4IP0HNMVIDxOD9bsAAAAASUVORK5CYII=" />
@@ -105,7 +105,7 @@ html[data-theme="dark"], html[data-theme="dark"] body { background: #12181A; }
 <div id="caesarBetaBadge" style="position:fixed;right:8px;bottom:8px;z-index:99997;
 background:rgba(18,42,78,.92);color:#fff;border:1px solid rgba(255,255,255,.25);
 border-radius:999px;padding:5px 8px;font:600 9.5px/1.1 sans-serif;pointer-events:none;">
-Dev-CAESAR_+assess_prototype
+Dev-CAESAR assess beta v0.6.9
 </div>
 <div id="root"></div>
 <div id="themeCurtain" class="theme-curtain"></div>
@@ -123,7 +123,7 @@ Dev-CAESAR_+assess_prototype
 
 <script>
 
-const CAESAR_APP_VERSION = "0.6.7";
+const CAESAR_APP_VERSION = "0.5.3";
 const CAESAR_REST_MAINLINE_VERSION = CAESAR_APP_VERSION;
 
 /* ==================================================================
@@ -1729,6 +1729,12 @@ function caesarDocSnapshot(ref, doc){
   };
 }
 
+const CAESAR_WHERE_OPS = {
+  "<":"LESS_THAN", "<=":"LESS_THAN_OR_EQUAL", "==":"EQUAL",
+  ">":"GREATER_THAN", ">=":"GREATER_THAN_OR_EQUAL", "!=":"NOT_EQUAL",
+  "array-contains":"ARRAY_CONTAINS", "in":"IN", "array-contains-any":"ARRAY_CONTAINS_ANY"
+};
+
 async function caesarRunQuery(collectionRef, queryState){
   const headers = await caesarRestHeaders();
   const parentSegments = collectionRef._segments.slice(0, -1);
@@ -1739,6 +1745,12 @@ async function caesarRunQuery(collectionRef, queryState){
       field:{fieldPath:o.field},
       direction:String(o.dir || "asc").toLowerCase() === "desc" ? "DESCENDING" : "ASCENDING"
     }));
+  }
+  if(queryState && queryState.wheres && queryState.wheres.length){
+    const filters = queryState.wheres.map(w => ({
+      fieldFilter:{field:{fieldPath:w.field}, op:CAESAR_WHERE_OPS[w.op] || "EQUAL", value:caesarEncodeValue(w.value)}
+    }));
+    structuredQuery.where = filters.length === 1 ? filters[0] : {compositeFilter:{op:"AND", filters}};
   }
   if(queryState && queryState.limit != null) structuredQuery.limit = queryState.limit;
 
@@ -2006,9 +2018,13 @@ function caesarStartQuerySub(collectionRef, state, onNext, onError, seedRecords)
 function caesarQueryRef(collectionRef, state){
   const base = {
     orders:[...((state && state.orders) || [])],
+    wheres:[...((state && state.wheres) || [])],
     limit:state && state.limit != null ? state.limit : null
   };
   return {
+    where(field, op, value){
+      return caesarQueryRef(collectionRef, {...base, wheres:[...base.wheres, {field:String(field), op, value}]});
+    },
     orderBy(field, dir){
       return caesarQueryRef(collectionRef, {...base, orders:[...base.orders, {field:String(field), dir:dir || "asc"}]});
     },
@@ -2051,6 +2067,7 @@ function caesarCollectionRef(segments, topLevel){
       return caesarDocRef([...segments, docId]);
     },
     async get(){ return caesarRunQuery(ref, {orders:[], limit:null}); },
+    where(field, op, value){ return caesarQueryRef(ref, {orders:[], wheres:[{field:String(field), op, value}], limit:null}); },
     orderBy(field, dir){ return caesarQueryRef(ref, {orders:[{field:String(field), dir:dir || "asc"}], limit:null}); },
     limit(n){ return caesarQueryRef(ref, {orders:[], limit:n}); },
     onSnapshot(onNext, onError){ return caesarQueryRef(ref, {orders:[], limit:null}).onSnapshot(onNext, onError); },
@@ -2319,6 +2336,40 @@ async function getUsageEntriesForExport() {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
+// 使用記録の本当のバックアップ。全件を毎回読み直すのではなく、
+// 前回バックアップした時点のcreatedAtカーソル（meta/backupState.usageEntriesBackupCursor）より
+// 新しい記録"だけ"をwhereで絞り込んで取得し、usageEntriesBackup（消さずに積み上げるコレクション）へ複製する。
+// 読み書きは「前回から増えた件数」だけで済み、これは定期の自動バックアップ（autoBackupIfNeeded）に
+// 組み込んで自動実行するほか、消去機能の実行直前にも呼んで「消す対象がバックアップ漏れ」にならないようにする。
+async function backupNewUsageEntries() {
+  const stateRef = db.collection("meta").doc("backupState");
+  const stateSnap = await withDbTimeout(stateRef.get(), "usageEntriesBackup-state-get-timeout");
+  const cursor = (stateSnap.exists && stateSnap.data().usageEntriesBackupCursor) || 0;
+  const snap = await withDbTimeout(
+    db.collection("usageEntries").where("createdAt", ">", cursor).orderBy("createdAt", "asc").get(),
+    "usageEntriesBackup-query-timeout"
+  );
+  if (!snap.docs.length) return 0;
+  const ops = snap.docs.map((d) => (batch) => batch.set(db.collection("usageEntriesBackup").doc(d.id), d.data()));
+  await commitOpsInChunks(ops);
+  const maxCreatedAt = snap.docs.reduce((m, d) => Math.max(m, d.data().createdAt || 0), cursor);
+  await withDbTimeout(stateRef.set({ usageEntriesBackupCursor: maxCreatedAt }, { merge: true }), "usageEntriesBackup-state-set-timeout");
+  return snap.docs.length;
+}
+
+// 使用記録の消去（管理者専用・任意の期間）。この検索用REST層はwhere絞り込みに対応していないため、
+// エクスポートと同じく「押された時だけ」usageEntriesを1回丸ごと取得し、期間はこちら側で絞り込む
+// （getUsageEntriesForExportを流用。確認画面ですでに絞り込み済みの記録一式を受け取るので、ここでの追加読み込みはゼロ）。
+// 削除の直前にbackupNewUsageEntriesを呼び、まだバックアップされていない分だけ先に複製してから消す。
+async function deleteUsageEntriesByIds(entries) {
+  if (!entries || !entries.length) return 0;
+  await backupNewUsageEntries();
+  const ops = entries.map((u) => (batch) => batch.delete(db.collection("usageEntries").doc(u.id)));
+  await commitOpsInChunks(ops);
+  bumpSyncVersion(["usageEntries"]).catch((e) => console.warn("syncVersion更新に失敗:", e));
+  return entries.length;
+}
+
 // 前回の自動バックアップから一定時間（1時間）経っていれば新しくバックアップを作る。
 // アプリ起動時に加えて、開きっぱなしのセッション中も定期的に呼び出される。
 // data: createBackupSnapshotへそのまま渡す、呼び出し元がすでに読み込み済みのデータ一式。
@@ -2330,6 +2381,11 @@ async function autoBackupIfNeeded(data) {
   await createBackupSnapshot("auto", data);
   await withDbTimeout(stateRef.set({ lastAutoBackupAt: new Date().toISOString() }, { merge: true }), "autoBackupState-set-timeout");
   await rotateOldBackups();
+  try {
+    await backupNewUsageEntries();
+  } catch (e) {
+    console.warn("使用記録の自動バックアップに失敗:", e);
+  }
 }
 
 // 指定したバックアップの内容で、現在のデータを完全に置き換える（元に戻せない操作）
@@ -3797,6 +3853,31 @@ function ChemicalDetail({ chemical, waste, onBack, onEdit, onOpenLocation, onOpe
   const archivedLabel = !hasWaste && chemical.wasteLabel ? chemical.wasteLabel : null;
   const safeWaste = waste || (archivedLabel ? { ...UNKNOWN_WASTE, code: archivedLabel.code, name: archivedLabel.name } : UNKNOWN_WASTE);
 
+  // 使用履歴：常時は読み込まず、ボタンが押された時だけusageEntries全件を1回取得し、
+  // この薬品のchemicalIdで絞り込む（エクスポートや消去の確認と同じ「押した時だけ読む」方式）
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [history, setHistory] = useState(null);
+
+  const handleToggleHistory = async () => {
+    if (historyOpen) { setHistoryOpen(false); return; }
+    setHistoryOpen(true);
+    if (history !== null) return;
+    setHistoryLoading(true);
+    try {
+      const all = await getUsageEntriesForExport();
+      const mine = all
+        .filter((u) => u.chemicalId === chemical.id)
+        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      setHistory(mine);
+    } catch (e) {
+      toastFail("使用履歴の取得", e);
+      setHistoryOpen(false);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
   return (
     <div>
       <TopBar
@@ -3932,10 +4013,44 @@ function ChemicalDetail({ chemical, waste, onBack, onEdit, onOpenLocation, onOpe
         <button
           onClick={() => canRecordWaste && onRecordWaste(chemical, waste)}
           disabled={!canRecordWaste}
-          style={{ width: "100%", border: `1.5px solid ${C.tealDeep}`, background: C.paper, color: C.ink, fontSize: 14, fontWeight: 700, borderRadius: 12, padding: "12px", cursor: canRecordWaste ? "pointer" : "not-allowed", opacity: canRecordWaste ? 1 : 0.6, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+          style={{ width: "100%", border: `1.5px solid ${C.tealDeep}`, background: C.paper, color: C.ink, fontSize: 14, fontWeight: 700, borderRadius: 12, padding: "12px", cursor: canRecordWaste ? "pointer" : "not-allowed", opacity: canRecordWaste ? 1 : 0.6, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginBottom: 20 }}
         >
           <Plus size={16} /> {wasteDisposed ? "処分済みのため記録できません" : "この薬品の廃液を記録する"}
         </button>
+
+        <SectionLabel>使用履歴</SectionLabel>
+        <button
+          onClick={handleToggleHistory}
+          style={{ width: "100%", textAlign: "left", background: C.paper, border: `1px solid ${C.line}`, borderRadius: 14, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, marginBottom: historyOpen ? 10 : 0 }}
+        >
+          <div style={{ width: 38, height: 38, borderRadius: 10, background: C.okBg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Calendar size={18} color={C.tealDeep} />
+          </div>
+          <div style={{ flex: 1, fontWeight: 600, fontSize: 14.5, color: C.ink }}>
+            {historyOpen ? "使用履歴を閉じる" : "この薬品の使用履歴を見る"}
+          </div>
+          <ChevronRight size={18} color={C.inkSoft} style={{ transform: historyOpen ? "rotate(90deg)" : "none" }} />
+        </button>
+
+        {historyOpen && (
+          historyLoading ? (
+            <div style={{ textAlign: "center", fontSize: 12.5, color: C.inkSoft, padding: "14px 0" }}>読み込んでいます…</div>
+          ) : history && history.length > 0 ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {history.map((u) => (
+                <div key={u.id} style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 12, padding: "11px 14px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+                    <span style={{ fontFamily: "'Roboto Mono', monospace", fontWeight: 700, fontSize: 13, color: C.ink }}>{u.date}</span>
+                    <span style={{ fontFamily: "'Roboto Mono', monospace", fontWeight: 700, fontSize: 13.5, color: C.tealDeep }}>-{u.amount} {u.unit || "g"}</span>
+                  </div>
+                  <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 4 }}>{u.personName}{u.purpose ? `・${u.purpose}` : ""}</div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ textAlign: "center", fontSize: 12.5, color: C.inkSoft, padding: "14px 0" }}>まだ使用記録がありません</div>
+          )
+        )}
       </div>
     </div>
   );
@@ -4663,6 +4778,7 @@ function WasteEntryAddPage({ waste, lockedSubstanceName, onBack, onSave }) {
   const [concentrationGL, setConcentrationGL] = useState("");
   const [volumeMl, setVolumeMl] = useState("");
   const [showCalc, setShowCalc] = useState(false);
+  const [confirming, setConfirming] = useState(false);
 
   const finalSubstanceName = lockedSubstanceName || substanceName.trim();
   const canSave = date && personName.trim() && finalSubstanceName && concentrationGL !== "" && volumeMl !== "";
@@ -4678,7 +4794,12 @@ function WasteEntryAddPage({ waste, lockedSubstanceName, onBack, onSave }) {
     boxSizing: "border-box",
   };
 
-  const handleSave = () => {
+  const handleOpenConfirm = () => {
+    if (!canSave) return;
+    setConfirming(true);
+  };
+
+  const handleConfirmSave = () => {
     if (!canSave) return;
     onSave(waste.id, {
       id: "e_" + Date.now(),
@@ -4688,6 +4809,7 @@ function WasteEntryAddPage({ waste, lockedSubstanceName, onBack, onSave }) {
       concentrationGL: parseFloat(concentrationGL),
       volumeMl: parseFloat(volumeMl),
     });
+    setConfirming(false);
   };
 
   return (
@@ -4761,7 +4883,7 @@ function WasteEntryAddPage({ waste, lockedSubstanceName, onBack, onSave }) {
         </div>
 
         <button
-          onClick={handleSave}
+          onClick={handleOpenConfirm}
           disabled={!canSave}
           style={{ width: "100%", border: "none", background: canSave ? HEADER.bg : "#B7C0BC", color: "#fff", fontSize: 15, fontWeight: 600, borderRadius: 12, padding: "13px", cursor: canSave ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
         >
@@ -4774,6 +4896,39 @@ function WasteEntryAddPage({ waste, lockedSubstanceName, onBack, onSave }) {
           onClose={() => setShowCalc(false)}
           onApply={(resultGL) => setConcentrationGL(String(resultGL))}
         />
+      )}
+
+      {confirming && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(24,37,36,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: 20 }}>
+          <div style={{ background: C.paper, borderRadius: 16, padding: "20px 20px 18px", width: "100%", maxWidth: 340 }}>
+            <div style={{ fontWeight: 700, fontSize: 15, color: C.ink, marginBottom: 4 }}>この内容で保存しますか？</div>
+            <div style={{ fontSize: 12, color: C.inkSoft, marginBottom: 14 }}>投入記録として廃液タンクに追加されます。</div>
+
+            <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 12, padding: "12px 14px", fontSize: 13, color: C.ink, lineHeight: 2, marginBottom: 18 }}>
+              <div><span style={{ color: C.inkSoft }}>タンク：</span>{waste.code}　{waste.name}</div>
+              <div><span style={{ color: C.inkSoft }}>薬品名：</span>{renderFormula(finalSubstanceName)}</div>
+              <div><span style={{ color: C.inkSoft }}>日付：</span>{date}</div>
+              <div><span style={{ color: C.inkSoft }}>氏名：</span>{personName.trim()}</div>
+              <div><span style={{ color: C.inkSoft }}>濃度：</span>{concentrationGL} g/L</div>
+              <div><span style={{ color: C.inkSoft }}>使用量：</span>{volumeMl} mL</div>
+            </div>
+
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                onClick={() => setConfirming(false)}
+                style={{ flex: 1, border: `1px solid ${C.line}`, background: "transparent", color: C.inkSoft, fontSize: 14, fontWeight: 600, borderRadius: 10, padding: "11px", cursor: "pointer" }}
+              >
+                修正する
+              </button>
+              <button
+                onClick={handleConfirmSave}
+                style={{ flex: 1, border: "none", background: HEADER.bg, color: "#fff", fontSize: 14, fontWeight: 700, borderRadius: 10, padding: "11px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+              >
+                <Save size={14} /> 保存する
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -4926,6 +5081,7 @@ function RecordMassPage({ chemical, onBack, onSave }) {
   const [note, setNote] = useState("");
   const [personName, setPersonName] = useState("");
   const [saved, setSaved] = useState(false);
+  const [confirming, setConfirming] = useState(false);
 
   const today = new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" });
 
@@ -4935,10 +5091,16 @@ function RecordMassPage({ chemical, onBack, onSave }) {
 
   const canSave = !isNaN(parsedMass) && !!personName.trim() && !!note.trim();
 
-  const handleSave = () => {
+  const handleOpenConfirm = () => {
+    if (!canSave) return;
+    setConfirming(true);
+  };
+
+  const handleConfirmSave = () => {
     const value = parseFloat(mass);
     if (isNaN(value) || !personName.trim() || !note.trim()) return;
     onSave(chemical.id, value, note.trim(), personName.trim());
+    setConfirming(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 1600);
     setMass("");
@@ -5015,7 +5177,7 @@ function RecordMassPage({ chemical, onBack, onSave }) {
         />
 
         <button
-          onClick={handleSave}
+          onClick={handleOpenConfirm}
           disabled={!canSave}
           style={{ width: "100%", border: "none", background: canSave ? HEADER.bg : "#B7C0BC", color: "#fff", fontSize: 15, fontWeight: 600, borderRadius: 12, padding: "13px", cursor: canSave ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
         >
@@ -5028,6 +5190,44 @@ function RecordMassPage({ chemical, onBack, onSave }) {
           </div>
         )}
       </div>
+
+      {confirming && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(24,37,36,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: 20 }}>
+          <div style={{ background: C.paper, borderRadius: 16, padding: "20px 20px 18px", width: "100%", maxWidth: 340 }}>
+            <div style={{ fontWeight: 700, fontSize: 15, color: C.ink, marginBottom: 4 }}>この内容で保存しますか？</div>
+            <div style={{ fontSize: 12, color: C.inkSoft, marginBottom: 14 }}>保存すると在庫が更新され、使用記録として残ります。</div>
+
+            <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 12, padding: "12px 14px", fontSize: 13, color: C.ink, lineHeight: 2, marginBottom: 18 }}>
+              <div><span style={{ color: C.inkSoft }}>薬品：</span>{chemical.name}</div>
+              <div><span style={{ color: C.inkSoft }}>記録日：</span>{today}</div>
+              <div><span style={{ color: C.inkSoft }}>氏名：</span>{personName.trim()}</div>
+              <div><span style={{ color: C.inkSoft }}>使用後の重量：</span>{mass} g</div>
+              {usedAmount !== null && (
+                <div>
+                  <span style={{ color: C.inkSoft }}>{usedAmount >= 0 ? "使用量：" : "増加（在庫の訂正）：" }</span>
+                  {Math.abs(usedAmount)} g
+                </div>
+              )}
+              <div><span style={{ color: C.inkSoft }}>使用目的：</span>{note.trim()}</div>
+            </div>
+
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                onClick={() => setConfirming(false)}
+                style={{ flex: 1, border: `1px solid ${C.line}`, background: "transparent", color: C.inkSoft, fontSize: 14, fontWeight: 600, borderRadius: 10, padding: "11px", cursor: "pointer" }}
+              >
+                修正する
+              </button>
+              <button
+                onClick={handleConfirmSave}
+                style={{ flex: 1, border: "none", background: HEADER.bg, color: "#fff", fontSize: 14, fontWeight: 700, borderRadius: 10, padding: "11px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+              >
+                <Save size={14} /> 保存する
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -5451,6 +5651,147 @@ function RestoreBackupPreviewPage({ backupId, onBack, onRestore }) {
               )}
             </button>
           </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  使用記録の消去（管理者専用）                                          */
+/* ------------------------------------------------------------------ */
+
+function UsageEntriesDeletePage({ onBack, onDelete }) {
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [checking, setChecking] = useState(false);
+  const [checked, setChecked] = useState(false);
+  const [matches, setMatches] = useState([]);
+  const [deleting, setDeleting] = useState(false);
+  const [resultCount, setResultCount] = useState(null);
+
+  const resetCheck = () => {
+    setChecked(false);
+    setMatches([]);
+    setResultCount(null);
+  };
+
+  const rangeValid = !!fromDate && !!toDate && fromDate <= toDate;
+
+  const handleCheck = async () => {
+    if (!rangeValid) return;
+    setChecking(true);
+    resetCheck();
+    try {
+      const all = await getUsageEntriesForExport();
+      const filtered = all.filter((u) => {
+        const date = u.date || "";
+        return date >= fromDate && date <= toDate;
+      });
+      setMatches(filtered);
+      setChecked(true);
+    } catch (e) {
+      toastFail("使用記録の件数確認", e);
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  const preview = matches
+    .slice()
+    .sort((a, b) => (b.date || "").localeCompare(a.date || ""))
+    .slice(0, 5);
+
+  const handleExecute = () => {
+    if (!checked || matches.length === 0) return;
+    if (typeof window !== "undefined" && window.confirm) {
+      const ok = window.confirm(
+        `${fromDate} 〜 ${toDate} の使用記録 ${matches.length}件を削除します。\n削除前にusageEntriesBackupへ確実に複製されますが、この画面から元に戻すことはできません。\n本当に削除しますか？`
+      );
+      if (!ok) return;
+    }
+    setDeleting(true);
+    onDelete(matches)
+      .then((count) => {
+        setResultCount(count);
+        setMatches([]);
+        setChecked(false);
+      })
+      .catch((e) => toastFail("使用記録の削除", e))
+      .finally(() => setDeleting(false));
+  };
+
+  return (
+    <div>
+      <TopBar title="使用記録の消去" onBack={onBack} />
+      <div style={{ padding: 16, paddingBottom: 100 }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "flex-start", background: C.okBg, border: `1px solid #C6D3E3`, borderRadius: 10, padding: "12px 14px", marginBottom: 20 }}>
+          <Info size={15} color={C.tealDeep} style={{ flexShrink: 0, marginTop: 1 }} />
+          <div style={{ fontSize: 12, color: C.tealDeep, lineHeight: 1.7 }}>
+            指定した期間の「使用記録」（誰が・いつ・何のために・どれだけ使ったか）だけを削除します。薬品の在庫やその他のデータには影響しません。使用記録は自動バックアップでusageEntriesBackupへ複製されており、削除の直前にも未バックアップ分を追いつかせてから消すため、消した記録もそちらに残ります（アプリ画面からの復元は未対応です）。
+          </div>
+        </div>
+
+        <SectionLabel>開始日</SectionLabel>
+        <input
+          type="date"
+          value={fromDate}
+          onChange={(e) => { setFromDate(e.target.value); resetCheck(); }}
+          style={{ width: "100%", border: `1.5px solid ${C.line}`, borderRadius: 10, padding: "10px 13px", fontSize: 14.5, color: C.ink, fontFamily: "'Inter', sans-serif", boxSizing: "border-box", marginBottom: 14 }}
+        />
+
+        <SectionLabel>終了日</SectionLabel>
+        <input
+          type="date"
+          value={toDate}
+          onChange={(e) => { setToDate(e.target.value); resetCheck(); }}
+          style={{ width: "100%", border: `1.5px solid ${C.line}`, borderRadius: 10, padding: "10px 13px", fontSize: 14.5, color: C.ink, fontFamily: "'Inter', sans-serif", boxSizing: "border-box", marginBottom: 6 }}
+        />
+        <div style={{ fontSize: 11.5, color: C.inkSoft, marginBottom: 20 }}>
+          両方の日付を指定してください（開始日・終了日を含む期間が対象になります）。
+        </div>
+
+        <button
+          onClick={handleCheck}
+          disabled={!rangeValid || checking}
+          style={{ width: "100%", border: `1.5px solid ${C.line}`, background: C.paper, color: rangeValid ? C.ink : C.inkSoft, fontSize: 14, fontWeight: 600, borderRadius: 12, padding: "12px", cursor: rangeValid && !checking ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 20 }}
+        >
+          <Search size={15} /> {checking ? "確認しています…" : "対象件数を確認する"}
+        </button>
+
+        {checked && (
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: 13.5, fontWeight: 700, color: C.ink, marginBottom: 10 }}>
+              対象：{matches.length}件
+            </div>
+            {matches.length > 0 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {preview.map((u) => (
+                  <div key={u.id} style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 10, padding: "10px 12px", fontSize: 12.5, color: C.inkSoft }}>
+                    <span style={{ fontFamily: "'Roboto Mono', monospace", fontWeight: 600, color: C.ink }}>{u.date}</span>
+                    {"　"}{u.chemicalName || ""}・{u.personName || ""}・{u.amount ?? ""}{u.unit || "g"}
+                  </div>
+                ))}
+                {matches.length > preview.length && (
+                  <div style={{ fontSize: 12, color: C.inkSoft, textAlign: "center" }}>他 {matches.length - preview.length}件</div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        <button
+          onClick={handleExecute}
+          disabled={!checked || matches.length === 0 || deleting}
+          style={{ width: "100%", border: "none", background: checked && matches.length > 0 && !deleting ? C.danger : "#B7C0BC", color: "#fff", fontSize: 14.5, fontWeight: 700, borderRadius: 12, padding: "13px", cursor: checked && matches.length > 0 && !deleting ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+        >
+          <Trash2 size={16} /> {deleting ? "削除しています…" : matches.length > 0 ? `${matches.length}件を完全に削除する` : "対象を確認してください"}
+        </button>
+
+        {resultCount !== null && (
+          <div style={{ marginTop: 14, textAlign: "center", fontSize: 13, fontWeight: 600, color: C.tealDeep, background: C.okBg, borderRadius: 10, padding: "10px" }}>
+            {resultCount}件の使用記録を削除しました。
+          </div>
         )}
       </div>
     </div>
@@ -5934,6 +6275,34 @@ const toggleTheme = () => {
     }
   };
 
+  // Excelエクスポート（管理者専用）：薬品一覧・使用記録などを書き出す。誤操作防止のため、
+  // 実行前に管理者パスコードの入力を要求する。
+  const handleExportExcelRequest = () => {
+    setPasscodeGate({
+      title: "管理者確認",
+      message: "Excelを書き出すには、管理者パスコードを入力してください。",
+      onCancel: () => setPasscodeGate(null),
+      onConfirm: () => {
+        setPasscodeGate(null);
+        handleExportExcel();
+      },
+    });
+  };
+
+  // 使用記録の消去（管理者専用）：任意の期間の使用記録をまとめて削除する。誤操作防止のため、
+  // 実行前に管理者パスコードの入力を要求する（実際の削除実行はページ内でさらにwindow.confirmを挟む）。
+  const handleDeleteUsageEntriesRequest = () => {
+    setPasscodeGate({
+      title: "管理者確認",
+      message: "使用記録を消去するには、管理者パスコードを入力してください。",
+      onCancel: () => setPasscodeGate(null),
+      onConfirm: () => {
+        setPasscodeGate(null);
+        push({ view: "deleteUsageEntries" });
+      },
+    });
+  };
+
   // 復元（管理者専用）：過去のバックアップから内容を選んで復元する。誤操作防止のため、
   // 実行前に管理者パスコードの入力を要求する。
   const handleRestoreRequest = () => {
@@ -6269,12 +6638,12 @@ const handleDeleteWasteCategories = (wastes) => {
   right={
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <button
-        onClick={handleExportExcel}
-        aria-label="薬品一覧をExcelで書き出す"
-        title="薬品一覧をExcelで書き出す"
+        onClick={handleExportExcelRequest}
+        aria-label="薬品一覧をExcelで書き出す（管理者のみ）"
+        title="薬品一覧をExcelで書き出す（管理者のみ）"
         style={{ border: "none", background: "rgba(255,255,255,.14)", color: HEADER.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: 999, padding: 0, flex: "0 0 auto" }}
       >
-        <Download size={16} />
+        <Lock size={16} />
       </button>
       <button
         onClick={handleRestoreRequest}
@@ -6282,7 +6651,15 @@ const handleDeleteWasteCategories = (wastes) => {
         title="バックアップから復元する（管理者のみ）"
         style={{ border: "none", background: "rgba(255,255,255,.14)", color: HEADER.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: 999, padding: 0, flex: "0 0 auto" }}
       >
-        <RotateCcw size={16} />
+        <Lock size={16} />
+      </button>
+      <button
+        onClick={handleDeleteUsageEntriesRequest}
+        aria-label="使用記録を消去する（管理者のみ）"
+        title="使用記録を消去する（管理者のみ）"
+        style={{ border: "none", background: "rgba(255,255,255,.14)", color: HEADER.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: 999, padding: 0, flex: "0 0 auto" }}
+      >
+        <Lock size={16} />
       </button>
       <button
         onClick={caesarOpenDiagnosticLog}
@@ -6508,6 +6885,10 @@ const handleDeleteWasteCategories = (wastes) => {
 
         {current.view === "restorePreview" && (
           <RestoreBackupPreviewPage backupId={current.backupId} onBack={pop} onRestore={handleRunRestore} />
+        )}
+
+        {current.view === "deleteUsageEntries" && (
+          <UsageEntriesDeletePage onBack={pop} onDelete={deleteUsageEntriesByIds} />
         )}
       </div>
       {passcodeGate && (
