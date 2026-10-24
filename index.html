@@ -3540,6 +3540,14 @@ function WasteTab({ wasteCategories, onOpenWaste, onOpenCalc, onOpenArchive, onA
     () => wasteCategories.filter((w) => !w.disposed).sort(compareWasteCode),
     [wasteCategories]
   );
+
+  // 管理者ログイン中かどうか（ログイン直後・10分経過・ログアウトに追従する）
+  const [adminOn, setAdminOn] = useState(caesarAdminIsActive());
+  useEffect(() => {
+    const t = setInterval(() => setAdminOn(caesarAdminIsActive()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
   return (
     <div style={{ padding: 16 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, flexWrap: "wrap", gap: 6 }}>
@@ -3563,12 +3571,17 @@ function WasteTab({ wasteCategories, onOpenWaste, onOpenCalc, onOpenArchive, onA
           >
             <Calculator size={13} /> g/L計算ツール
           </button>
-          <button
-            onClick={onChangePasscode}
-            style={{ border: `1.5px solid ${C.line}`, background: C.paper, color: C.ink, fontSize: 11.5, fontWeight: 700, borderRadius: 8, padding: "6px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
-          >
-            <Lock size={13} /> 管理者ログアウト
-          </button>
+          {adminOn && (
+            <button
+              onClick={() => {
+                onChangePasscode();
+                setAdminOn(caesarAdminIsActive());
+              }}
+              style={{ border: `1.5px solid ${C.line}`, background: C.paper, color: C.ink, fontSize: 11.5, fontWeight: 700, borderRadius: 8, padding: "6px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
+            >
+              <Lock size={13} /> 管理者ログアウト
+            </button>
+          )}
           <button
             onClick={onRefresh}
             title="最新データを取得（手動更新）"
