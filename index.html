@@ -2454,13 +2454,6 @@ async function restoreFromBackup(backupId) {
   );
 }
 
-  // 復元は通常の書き込みハンドラを経由しないため、明示的にsyncVersionを進めておく。
-  // （これをしないと、この端末や他端末が「変更なし」と誤判定してキャッシュを使い続けてしまう）
-  await bumpSyncVersion(["chemicals", "wasteCategories", "wasteEntries", "locations"]).catch((e) =>
-    console.warn("復元後のsyncVersion更新に失敗:", e)
-  );
-}
-
 // バックアップの日時をアプリ内表示用に整形する
 function formatBackupDate(iso) {
   const d = iso ? new Date(iso) : null;
