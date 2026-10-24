@@ -6607,14 +6607,9 @@ const handleAddWasteCategory = ({ code, name, note, color }) => {
 };
 
 const handleOpenChangePasscode = () => {
-  if (caesarAdminIsActive()) {
-    caesarAdminLogout();
-    showToast("管理者ログアウトしました", false);
-  } else {
-    showToast("管理者ログインは、該当の操作をする時に求められます", false);
-  }
+  caesarAdminLogout();
+  showToast("管理者ログアウトしました", false);
 };
-
 const handleSavePasscode = async (newPasscode) => {
   try{
     await withDbTimeout(db.collection("meta").doc("settings").set({ passcode: newPasscode }, { merge: true }), "savePasscode-set-timeout");
