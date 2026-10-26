@@ -147,9 +147,10 @@ function caesarDiagSafeDetail(category,detail){
   if(category==="promise-rejection")return "promise-rejection";
   if(category==="connection")return detail==="offline"?"offline":"online";
   if(category==="self-test")return "diagnostic-test";
+  if(category==="admin-login-failed")return String(detail||"").replace(/[^A-Za-z0-9_= -]/g,"").slice(0,60);
   return "";
 }
-function caesarDiagShouldRemote(category){return ["http-error","network-error","javascript-error","promise-rejection","connection","self-test"].includes(category)}
+function caesarDiagShouldRemote(category){return ["http-error","network-error","javascript-error","promise-rejection","connection","self-test","admin-login-failed"].includes(category)}
 function caesarDiagLogRecord(category,location,status,detail){
   const row={time:new Date().toISOString(),appVersion:(typeof CAESAR_APP_VERSION!=="undefined"?CAESAR_APP_VERSION:"dev-beta"),online:navigator.onLine!==false,status:status==null?null:Number(status),category:String(category||"unknown").slice(0,40),location:String(location||"unknown").slice(0,80),detail:caesarDiagSafeDetail(category,detail)};
   try{const rows=caesarDiagLogLoad();rows.push(row);localStorage.setItem(CAESAR_DIAG_LOG_KEY,JSON.stringify(rows.slice(-CAESAR_DIAG_LOG_LIMIT)))}catch(_){}
